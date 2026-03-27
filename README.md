@@ -17,7 +17,7 @@ This project demonstrates the deployment of a lightweight Kubernetes cluster usi
 - Disk: 50 GB per instance
 - OS: Ubuntu 24.04 LTS
 - Security Group: k3s-cluster-sg
-- 
+
 ---
 
 ## Architecture Explanation
