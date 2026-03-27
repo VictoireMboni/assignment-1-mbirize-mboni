@@ -17,7 +17,7 @@ This project demonstrates the deployment of a lightweight Kubernetes cluster usi
 - Disk: 50 GB per instance
 - OS: Ubuntu 24.04 LTS
 - Security Group: k3s-cluster-sg
-
+- 
 ---
 
 ## Architecture Explanation
@@ -32,10 +32,10 @@ This setup consists of three EC2 instances acting as master nodes in a K3s high-
 ---
 
 ## Step 1: EC2 Instance Creation
+
 I created three EC2 instances using Ubuntu 24.04 and configured them for the K3s cluster.
 
 <img width="1745" height="769" alt="Screenshot 2026-03-27 163158" src="https://github.com/user-attachments/assets/599d9af0-8de3-47ce-a301-4723f2720eda" />
-
 
 ---
 
