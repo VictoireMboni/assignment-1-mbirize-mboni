@@ -165,6 +165,7 @@ One challenge I faced was that the nodes could not join the cluster due to a sec
 
 I also learned how K3s simplifies Kubernetes while still using the same core concepts such as control planes, nodes, and cluster communication. This experience improved my skills in troubleshooting, cloud setup, and Kubernetes deployment.
 
+
 ---
 
 ## Conclusion
