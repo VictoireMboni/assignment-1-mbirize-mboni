@@ -63,6 +63,13 @@ Note the Private and Public IPs
 | k3s-master-2 | 172.31.88.163 | 54.152.187.63 |
 | k3s-master-3 | 172.31.83.62 | 54.86.242.80 |
 
+## Installation Steps and Exact Commands
+
+### Step 1: SSH into the First Master Node
+```bash
+ssh -i k3s-master-1.pem ubuntu@54.166.216.17
+```
+
 I noticed that whenever I stopped and restarted my lab, the public IP addresses changed.  
 To fix this, I created an Elastic IP.
 
@@ -82,6 +89,19 @@ I prepared all nodes by:
 - Updating packages
 - Configuring `/etc/hosts`
 - Disabling swap
+#Commands
+```bash
+sudo hostnamectl set-hostname k3s-master-1
+sudo apt-get update && sudo apt-get upgrade -y
+sudo timedatectl set-timezone UTC
+sudo tee -a /etc/hosts <<EOF
+172.31.83.8    k3s-master-1
+172.31.88.163  k3s-master-2
+172.31.83.62   k3s-master-3
+EOF
+sudo swapoff -a
+sudo sed -i '/ swap / s/^/#/' /etc/fstab
+```
 
 <img width="1165" height="930" alt="Screenshot 2026-03-21 000116" src="https://github.com/user-attachments/assets/7d76a9a8-a796-4f95-8649-6adebf22add7" />
 
@@ -97,6 +117,25 @@ Then I verified the installation using kubectl commands and retrieved the cluste
 
 <img width="1026" height="305" alt="Screenshot 2026-03-27 143804" src="https://github.com/user-attachments/assets/d1805090-029c-4101-aa23-b3c66dd1e6b4" />
 
+## Commands
+```bash
+sudo mkdir -p /etc/rancher/k3s
+sudo tee /etc/rancher/k3s/config.yaml <<EOF
+cluster-init: true
+node-ip: 172.31.83.8
+advertise-address: 172.31.83.8
+tls-san:
+  - 172.31.83.8
+  - 54.166.216.17
+  - k3s-master-1
+disable:
+  - servicelb
+  - traefik
+EOF
+```
+```bash
+curl -sfL https://get.k3s.io | sh -
+```
 ---
 
 ## Step 6: Join Master Nodes 2 and 3
@@ -107,6 +146,11 @@ I configured both nodes with:
 
 Then I installed K3s as server nodes.
 
+## Commands
+
+```bash
+sudo cat /var/lib/rancher/k3s/server/token
+```
 ---
 
 ## Step 7: Error Encountered
@@ -128,6 +172,20 @@ I then assigned this security group to all three instances so they could communi
 <img width="1741" height="638" alt="Screenshot 2026-03-27 160108" src="https://github.com/user-attachments/assets/e9ffd916-5c5c-4128-b86c-57f6ebc869e2" />
 
 
+## Commands Join Master Node 2
+
+```bash
+curl -sfL https://get.k3s.io | sh -s - server \
+  --server https://172.31.83.8:6443 \
+  --token <token>
+```
+## Commands Join Master Node 3
+
+```bash
+curl -sfL https://get.k3s.io | sh -s - server \
+  --server https://172.31.83.8:6443 \
+  --token <token>
+```
 ---
 
 ## Step 9: Connectivity Test
@@ -152,6 +210,12 @@ After fixing the issue, I restarted K3s on nodes 2 and 3 and confirmed that all 
 
 I verified that all system pods were running correctly.
 
+## Commands for the Final Verification
+
+```bash
+sudo kubectl get nodes -o wide
+sudo kubectl get pods -A
+```
 <img width="1580" height="542" alt="Screenshot 2026-03-27 161902" src="https://github.com/user-attachments/assets/8059bff3-3284-424b-816f-72c6f9049af9" />
 <img width="1908" height="819" alt="Screenshot 2026-03-27 190719" src="https://github.com/user-attachments/assets/098483fa-59b2-43db-96d2-e05e9919156c" />
 
@@ -159,12 +223,15 @@ I verified that all system pods were running correctly.
 
 ## Reflection
 
-This assignment helped me understand how to deploy a K3s cluster on AWS and how cloud networking affects Kubernetes communication. I learned how to configure EC2 instances, assign Elastic IPs, and prepare Linux systems for cluster deployment.
+This assignment gave me practical experience in deploying a K3s high-availability cluster on AWS EC2 and helped me understand how cloud infrastructure, Linux administration, and Kubernetes work together. I learned how to provision EC2 instances, configure secure access, prepare multiple nodes, and initialize a control plane using K3s. I also learned that K3s is a lighter version of Kubernetes, but it still uses the same important concepts, such as nodes, control planes, cluster joining, and service verification.
 
-One challenge I faced was that the nodes could not join the cluster due to a security group issue. I fixed this by creating a new security group and allowing the correct ports. This helped me understand the importance of networking in cloud environments.
+One of the first challenges I faced was that the public IP addresses of my instances changed whenever I stopped and restarted the lab. This caused instability in the setup because the first master node needed a reliable external endpoint. I fixed this by creating and assigning an Elastic IP to the First Master Node. From this, I learned that stable addressing is very important in cloud deployments, especially when one node serves as the main cluster entry point.
 
-I also learned how K3s simplifies Kubernetes while still using the same core concepts such as control planes, nodes, and cluster communication. This experience improved my skills in troubleshooting, cloud setup, and Kubernetes deployment.
+Another major challenge occurred when the second and third master nodes failed to join the cluster. At first, K3s installation was completed, but the nodes could not communicate correctly with the First Master Node on port 6443. I investigated the issue by checking service logs and testing connectivity with curl. This helped me identify that the problem was caused by incorrect AWS security group rules. I then created a new security group called `k3s-cluster-sg`, allowed the required ports, and assigned it to all three instances. After that, the nodes joined successfully. This experience taught me that networking and firewall rules are just as important as installation commands in Kubernetes deployments.
 
+This assignment also helped me relate K3s to production Kubernetes and cloud-native concepts. Even though K3s is simplified, it still demonstrates real Kubernetes behavior such as cluster initialization, secure node joining, API communication, and pod management. In cloud-native and 5G-related environments, virtualization allows multiple isolated virtual machines to run on the same infrastructure, while containerization packages applications in a lightweight and portable way. Kubernetes then makes those containers easier to deploy, scale, and manage.
+
+Overall, this project improved my understanding of AWS, Linux server configuration, Kubernetes architecture, and troubleshooting. It showed me that successful deployment is not only about following commands, but also about understanding why the system works and how to fix it when it fails.
 
 ---
 
