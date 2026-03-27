@@ -74,7 +74,6 @@ I assigned the Elastic IP only to the **First Master Node** because it acts as t
 <img width="1856" height="693" alt="Screenshot 2026-03-27 140208" src="https://github.com/user-attachments/assets/d1af9c10-e2e1-4bd5-a313-3f5a11a28afe" />
 <img width="1908" height="829" alt="Screenshot 2026-03-27 140307" src="https://github.com/user-attachments/assets/533cfacd-faeb-4a1a-9230-90ba532c86f1" />
 
-
 ---
 
 ## Step 4: Prepare Nodes
